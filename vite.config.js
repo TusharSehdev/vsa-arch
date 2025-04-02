@@ -22,6 +22,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,jpg,jpeg,webp}'],
+        // Increase the maximum file size to cache (default is 2MB, set to 20MB)
+        maximumFileSizeToCacheInBytes: 20 * 1024 * 1024, // 20MB
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
@@ -99,8 +101,7 @@ export default defineConfig({
       output: {
         manualChunks: {
           'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-          'vendor-ui': ['framer-motion', 'tailwindcss'],
-          'vendor-utils': ['lodash', 'date-fns'],
+          'vendor-ui': ['framer-motion'],
         },
         // Add hashes to file names for better caching
         entryFileNames: 'assets/[name].[hash].js',
