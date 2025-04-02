@@ -1,0 +1,29 @@
+User-agent: *
+Allow: /
+Disallow: /private/
+Disallow: /temp/
+Disallow: /admin/
+Disallow: /api/
+Disallow: /*.json$
+Disallow: /*.js$
+Disallow: /*.css$
+
+# Allow important bots to crawl everything
+User-agent: Googlebot
+Allow: /
+
+User-agent: Googlebot-Image
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Slurp
+Allow: /
+
+# Sitemap location
+Sitemap: https://vsaarchitect.com/sitemap.xml
+
+# Crawl delay for heavier bots
+User-agent: *
+Crawl-delay: 10
