@@ -42,7 +42,7 @@ const FeaturedProjects = () => {
   };
 
   return (
-    <div className="bg-[#1a1a1a] md:max_padd_container2 lg:max_padd_container pt-16 lg:pt-20 pb-16 overflow-hidden">
+    <div className="bg-white dark:bg-[#1a1a1a] md:max_padd_container2 lg:max_padd_container pt-5 lg:pt-8 pb-16 overflow-hidden">
       <motion.div
         initial="hidden"
         whileInView="visible"
@@ -56,14 +56,14 @@ const FeaturedProjects = () => {
             className="flex justify-between items-end mb-14"
           >
             <div>
-              <h2 className="text-3xl md:text-5xl font-medium">
+              <h2 className="text-3xl md:text-5xl font-medium text-gray-900 dark:text-white">
                 Featured Projects
               </h2>
               <div className="w-16 h-[1px] mt-3 bg-primary"></div>
             </div>
             <Link
               to="/projects"
-              className="text-primary hover:text-white transition-colors duration-300 group flex items-center"
+              className="text-primary hover:text-gray-900 dark:hover:text-white transition-colors duration-300 group flex items-center"
             >
               <span className="mr-2">View All</span>
               <span className="transform translate-x-0 group-hover:translate-x-1 transition-transform duration-300">
@@ -97,9 +97,9 @@ const FeaturedProjects = () => {
                         <p className="text-sm text-primary">
                           {project.category}
                         </p>
-                        <p className="text-xs text-white/50">{project.year}</p>
+                        <p className="text-xs text-gray-500 dark:text-white/50">{project.year}</p>
                       </div>
-                      <h3 className="text-xl mt-1 group-hover:text-primary transition-colors duration-300">
+                      <h3 className="text-xl mt-1 text-gray-900 dark:text-white group-hover:text-primary transition-colors duration-300">
                         {project.title}
                       </h3>
                     </div>

@@ -37,7 +37,7 @@ const Testimonials = () => {
   };
 
   return (
-    <div className="bg-[#1a1a1a] md:max_padd_container2 lg:max_padd_container pt-16 lg:pt-20 pb-16 overflow-hidden">
+    <div className="bg-white dark:bg-[#1a1a1a] md:max_padd_container2 lg:max_padd_container pt-16 lg:pt-20 pb-16 overflow-hidden">
       <motion.div
         initial="hidden"
         whileInView="visible"
@@ -47,7 +47,7 @@ const Testimonials = () => {
         <div className="px-6 md:px-10">
           {/* Header */}
           <motion.div variants={fadeIn} className="mb-14">
-            <h2 className="text-3xl md:text-5xl font-medium">
+            <h2 className="text-3xl md:text-5xl font-medium text-gray-900 dark:text-white">
               Client Testimonials
             </h2>
             <div className="w-16 h-[1px] mt-3 bg-primary"></div>
@@ -80,17 +80,17 @@ const Testimonials = () => {
                     }}
                     transition={{ duration: 0.5 }}
                   >
-                    <p className="text-xl md:text-2xl font-light text-white/90 leading-relaxed mb-8">
+                    <p className="text-xl md:text-2xl font-light text-gray-900 dark:text-white/90 leading-relaxed mb-8">
                       {testimonial.quote}
                     </p>
-                    <div className="flex flex-col md:flex-row md:items-center md:border-t border-white/10 pt-6 mt-6">
+                    <div className="flex flex-col md:flex-row md:items-center md:border-t border-gray-200 dark:border-white/10 pt-6 mt-6">
                       <p className="font-medium text-primary text-lg md:text-xl">
                         {testimonial.author}
                       </p>
-                      <span className="hidden md:inline-block mx-3 text-white/30">
+                      <span className="hidden md:inline-block mx-3 text-gray-400 dark:text-white/30">
                         |
                       </span>
-                      <p className="text-white/70">{testimonial.position}</p>
+                      <p className="text-gray-700 dark:text-white/70">{testimonial.position}</p>
                     </div>
                   </motion.div>
                 ))}
@@ -115,7 +115,7 @@ const Testimonials = () => {
                 >
                   <div
                     className={`w-12 h-1 ${
-                      activeIndex === index ? "bg-primary" : "bg-white/30"
+                      activeIndex === index ? "bg-primary" : "bg-gray-300 dark:bg-white/30"
                     }`}
                   ></div>
                 </button>

@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 
-const Aboutus = () => {
+const Aboutus = ({ hideHeading = false }) => {
   // Animation variants
   const sectionVariants = {
     hidden: { opacity: 0 },
@@ -37,7 +37,7 @@ const Aboutus = () => {
   };
 
   return (
-    <div className="text-white bg-[#1a1a1a] md:max_padd_container2 lg:max_padd_container pt-16 lg:pt-28 pb-16 overflow-hidden">
+    <div className="text-gray-900 dark:text-white bg-white dark:bg-[#1a1a1a] md:max_padd_container2 lg:max_padd_container pt-16 lg:pt-28 pb-16 overflow-hidden">
       <motion.div
         initial="hidden"
         whileInView="visible"
@@ -60,16 +60,18 @@ const Aboutus = () => {
         />
 
         <div className="relative z-10 px-6 md:px-10">
-          {/* Header */}
-          <motion.div variants={fadeInUp} className="mb-16">
-            <motion.h2 className="text-3xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-white/70">
-              About Us
-            </motion.h2>
-            <motion.div
-              variants={fadeIn}
-              className="w-24 h-[2px] mt-2 bg-gradient-to-r from-primary to-primary/30"
-            />
-          </motion.div>
+          {/* Header - conditionally rendered based on hideHeading prop */}
+          {!hideHeading && (
+            <motion.div variants={fadeInUp} className="mb-16">
+              <motion.h2 className="text-3xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-white/70">
+                About Us
+              </motion.h2>
+              <motion.div
+                variants={fadeIn}
+                className="w-24 h-[2px] mt-2 bg-gradient-to-r from-primary to-primary/30"
+              />
+            </motion.div>
+          )}
 
           {/* Content Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-10 overflow-hidden">
@@ -80,7 +82,7 @@ const Aboutus = () => {
             >
               <motion.div
                 variants={fadeInUp}
-                className="text-white/90 text-lg lg:text-xl font-light mb-8 leading-relaxed"
+                className="text-gray-800 dark:text-white/90 text-lg lg:text-xl font-light mb-8 leading-relaxed"
               >
                 At VSA, we are passionate about shaping the built environment
                 through innovative architecture, interior design, urban design,
@@ -92,7 +94,7 @@ const Aboutus = () => {
 
               <motion.div
                 variants={fadeInUp}
-                className="text-white/80 mb-10 leading-relaxed"
+                className="text-gray-700 dark:text-white/80 mb-10 leading-relaxed"
               >
                 Our commitment to excellence drives us to push the boundaries of
                 design, creating spaces that inspire and elevate the human
@@ -191,7 +193,7 @@ const Aboutus = () => {
 
                 {/* Floating Element */}
                 <motion.div
-                  className="absolute bottom-6 left-6 px-4 py-2 bg-black/30 backdrop-blur-md rounded-full z-20 font-light text-sm"
+                  className="absolute bottom-6 left-6 px-4 py-2 bg-black/30 backdrop-blur-md rounded-full z-20 font-light text-sm text-white"
                   initial={{ x: -20, opacity: 0 }}
                   whileInView={{ x: 0, opacity: 1 }}
                   viewport={{ once: true }}

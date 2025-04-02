@@ -314,3 +314,48 @@ html {
   max-width: 90vw;
   max-height: 90vh;
 }
+
+/* Map Dark Mode Styles */
+.dark-map-container {
+  filter: contrast(0.8) brightness(0.9);
+}
+
+/* Style popup content for dark mode */
+.dark .leaflet-popup-content-wrapper, 
+.dark .leaflet-popup-tip {
+  background-color: #2a2a2a;
+  color: #ffffff;
+  border-color: #444444;
+}
+
+/* Style controls for dark mode */
+.dark .leaflet-control-zoom a,
+.dark .leaflet-control-layers-toggle {
+  background-color: #333333;
+  color: #ffffff;
+  border-color: #555555;
+}
+
+.dark .leaflet-control-attribution {
+  background-color: rgba(30, 30, 30, 0.8);
+  color: #cccccc;
+}
+
+.dark .leaflet-control-attribution a {
+  color: #84b4e0;
+}
+
+/* Override attribution color in dark mode */
+.dark-map-container .leaflet-control-attribution {
+  background-color: rgba(30, 30, 30, 0.8) !important;
+  color: #cccccc !important;
+}
+
+.dark-map-container .leaflet-control-attribution a {
+  color: #84b4e0 !important;
+}
+
+/* Minimap dark mode styles */
+.dark .leaflet-control .leaflet-container {
+  background-color: #333333;
+}

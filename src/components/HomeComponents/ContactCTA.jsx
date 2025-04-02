@@ -15,7 +15,7 @@ const ContactCTA = () => {
   };
 
   return (
-    <div className="bg-[#1a1a1a] md:max_padd_container2 lg:max_padd_container pt-16 lg:pt-20 pb-16 overflow-hidden">
+    <div className="bg-white dark:bg-[#1a1a1a] md:max_padd_container2 lg:max_padd_container pt-16 lg:pt-20 pb-16 overflow-hidden">
       <motion.div
         initial="hidden"
         whileInView="visible"
@@ -34,10 +34,10 @@ const ContactCTA = () => {
           <div className="px-6 md:px-10">
             <div className="max-w-4xl mx-auto text-center">
               <motion.div variants={fadeInUp} className="mb-8">
-                <h2 className="text-3xl md:text-5xl font-medium mb-5">
+                <h2 className="text-3xl md:text-5xl font-medium mb-5 text-gray-900 dark:text-white">
                   Ready to transform your space?
                 </h2>
-                <p className="text-white/70 text-lg md:text-xl font-light max-w-2xl mx-auto">
+                <p className="text-gray-700 dark:text-white/70 text-lg md:text-xl font-light max-w-2xl mx-auto">
                   Let's collaborate to create something extraordinary. Whether
                   you have a specific project in mind or need guidance, we're
                   here to help.
@@ -56,11 +56,11 @@ const ContactCTA = () => {
                 </Link>
                 <div className="flex items-center space-x-2">
                   <div className="w-2 h-2 bg-primary rounded-full"></div>
-                  <p className="text-white/70">or call us at</p>
+                  <p className="text-gray-700 dark:text-white/70">or call us at</p>
                 </div>
                 <a
                   href="tel:+919876543210"
-                  className="text-white hover:text-primary transition-colors duration-300 font-medium"
+                  className="text-gray-900 dark:text-white hover:text-primary transition-colors duration-300 font-medium"
                 >
                   +91 98765 43210
                 </a>
@@ -71,16 +71,16 @@ const ContactCTA = () => {
                 className="mt-12 flex justify-center space-x-8"
               >
                 <div className="text-center">
-                  <h3 className="text-lg font-medium mb-1">Visit Our Office</h3>
-                  <p className="text-white/60 text-sm">
+                  <h3 className="text-lg font-medium mb-1 text-gray-900 dark:text-white">Visit Our Office</h3>
+                  <p className="text-gray-600 dark:text-white/60 text-sm">
                     123 Architecture Plaza, Jalandhar, Punjab
                   </p>
                 </div>
                 <div className="text-center">
-                  <h3 className="text-lg font-medium mb-1">Email Us</h3>
+                  <h3 className="text-lg font-medium mb-1 text-gray-900 dark:text-white">Email Us</h3>
                   <a
                     href="mailto:info@vsaarchitects.com"
-                    className="text-white/60 text-sm hover:text-primary transition-colors duration-300"
+                    className="text-gray-600 dark:text-white/60 text-sm hover:text-primary transition-colors duration-300"
                   >
                     info@vsaarchitects.com
                   </a>

@@ -172,7 +172,7 @@ const MobileMenu = ({
                 <img
                   src="/facebook2.svg"
                   alt="Facebook"
-                  className="w-8 h-8 hover:opacity-70 transition-opacity dark:invert"
+                  className="w-8 h-8 hover:opacity-70 transition-opacity filter invert dark:invert-0"
                 />
               </Link>
               <Link
@@ -182,7 +182,7 @@ const MobileMenu = ({
                 <img
                   src="/instagram2.svg"
                   alt="Instagram"
-                  className="w-8 h-8 hover:opacity-70 transition-opacity dark:invert"
+                  className="w-8 h-8 hover:opacity-70 transition-opacity filter invert dark:invert-0"
                 />
               </Link>
               <ThemeToggle
@@ -228,16 +228,14 @@ export default function Navbar() {
 
     const handleScroll = () => {
       const isScrolled = window.scrollY > 10;
-      if (isScrolled !== scrolled) {
-        setScrolled(isScrolled);
-      }
+      setScrolled(isScrolled);
     };
 
     window.addEventListener("scroll", handleScroll);
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
-  }, [scrolled]);
+  }, []);
 
   // Body scroll lock when menu is open
   useEffect(() => {
@@ -326,7 +324,7 @@ export default function Navbar() {
                 <img
                   src="/facebook2.svg"
                   alt="Facebook"
-                  className="w-5 h-5 hover:opacity-70 transition-opacity dark:invert"
+                  className="w-5 h-5 hover:opacity-70 transition-opacity filter invert dark:invert-0"
                 />
               </Link>
               <Link
@@ -336,7 +334,7 @@ export default function Navbar() {
                 <img
                   src="/instagram2.svg"
                   alt="Instagram"
-                  className="w-5 h-5 hover:opacity-70 transition-opacity dark:invert"
+                  className="w-5 h-5 hover:opacity-70 transition-opacity filter invert dark:invert-0"
                 />
               </Link>
               <ThemeToggle

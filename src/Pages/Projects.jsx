@@ -1,34 +1,88 @@
-import React, { useState, useEffect, Suspense, lazy } from "react";
+import React, { useState, useEffect, Suspense, lazy, useCallback, memo } from "react";
 import Header from "../components/Header";
 import SEO from "../components/SEO";
-import { motion } from "framer-motion";
+import { LazyMotion, domAnimation, m } from "framer-motion";
+import Banner from "../components/Banner";
+import { throttle } from "../utils/performance";
+import { usePerformance } from "../context/PerformanceContext";
+import LoadingSpinner from "../components/LoadingSpinner";
 
-// Use dynamic import for lazy loading
-const Filter = lazy(() => import("../components/ProjectsComponents2/Filter"));
-const ProjectList = lazy(() =>
-  import("../components/ProjectsComponents2/ProjectList")
-);
+// Use dynamic import for lazy loading with prefetch hints
+const Filter = lazy(() => import(/* webpackPrefetch: true */ "../components/ProjectsComponents2/Filter"));
+const ProjectList = lazy(() => import(/* webpackPrefetch: true */ "../components/ProjectsComponents2/ProjectList"));
 
 // Use ES module import for static data
 import { projectsData } from "../assets/projectsData";
 
+// Component fallback
+const SectionLoader = () => (
+  <div className="flex justify-center items-center h-64">
+    <LoadingSpinner />
+  </div>
+);
+
 const Projects = () => {
-  useEffect(() => {
-    window.scrollTo(0, 0);
+  const { trackRender } = usePerformance();
+  
+  // Memoize scroll function
+  const scrollToTop = useCallback(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
   }, []);
+  
+  // Memoize preload function
+  const preloadComponents = useCallback(() => {
+    // Use dynamic imports to preload components that will be needed soon
+    import("../components/ProjectsComponents2/ProjectCard");
+  }, []);
+  
+  // Track initial render
+  useEffect(() => {
+    // Track component render once
+    trackRender("Projects");
+    
+    // Scroll to top optimized with requestAnimationFrame
+    requestAnimationFrame(scrollToTop);
+    
+    // Defer preloading using requestIdleCallback
+    if ('requestIdleCallback' in window) {
+      window.requestIdleCallback(preloadComponents, { timeout: 2000 });
+    } else {
+      setTimeout(preloadComponents, 300);
+    }
+  }, []); // Empty dependency array
 
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
+  const [filteredProjects, setFilteredProjects] = useState(projectsData);
 
-  const filteredProjects = projectsData.filter((project) => {
-    const matchesCategory =
-      selectedCategory === "All" ||
-      project.categories.includes(selectedCategory);
-    const matchesSearchQuery = project.title
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearchQuery;
-  });
+  // Memoize filter function to prevent unnecessary recalculations
+  const filterProjects = useCallback(() => {
+    return projectsData.filter((project) => {
+      const matchesCategory =
+        selectedCategory === "All" ||
+        project.categories.includes(selectedCategory);
+      const matchesSearchQuery = project.title
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase());
+      return matchesCategory && matchesSearchQuery;
+    });
+  }, [selectedCategory, searchQuery]);
+
+  // Use throttled effect for filtering to prevent excessive renders
+  useEffect(() => {
+    const updateFilteredProjects = throttle(() => {
+      setFilteredProjects(filterProjects());
+    }, 100);
+    
+    updateFilteredProjects();
+    
+    return () => {
+      // Clean up any subscriptions or timers
+    };
+  }, [filterProjects]);
 
   const keywords = `
     Architectural projects Jalandhar, Jalandhar project portfolio, Recent projects Jalandhar, 
@@ -63,64 +117,39 @@ const Projects = () => {
         breadcrumb={true}
       />
       <Header />
-      <motion.div
-        className="container mx-auto p-4 text-white bg-[#1a1a1a] pt-24 lg:pt-32"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.8 }}
-      >
-        <motion.div
-          className="mb-10 mx-4"
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-        >
-          <h1 className="text-5xl font-medium">Our Projects</h1>
-          <div className="border border-primary mt-4"></div>
-        </motion.div>
-        <Suspense
-          fallback={
-            <div className="flex justify-center items-center h-40">
-              <motion.div
-                animate={{
-                  scale: [1, 1.2, 1],
-                  opacity: [0.5, 1, 0.5],
-                }}
-                transition={{
-                  duration: 1.5,
-                  repeat: Infinity,
-                  repeatType: "loop",
-                }}
-                className="text-xl text-primary"
-              >
-                Loading...
-              </motion.div>
-            </div>
-          }
-        >
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
-          >
+      <div className="bg-white dark:bg-[#1a1a1a]">
+        {/* Banner Component */}
+        <Banner 
+          title="Our Projects" 
+          subtitle="Explore our diverse portfolio of architectural projects, each designed with purpose, precision, and passion for creating exceptional spaces."
+        />
+
+        {/* Main content */}
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <Suspense fallback={<SectionLoader />}>
             <Filter
               selectedCategory={selectedCategory}
               setSelectedCategory={setSelectedCategory}
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}
             />
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.5 }}
-          >
-            <ProjectList projects={filteredProjects} />
-          </motion.div>
-        </Suspense>
-      </motion.div>
+            
+            <LazyMotion features={domAnimation}>
+              <m.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="mt-8"
+              >
+                <ProjectList projects={filteredProjects} />
+              </m.div>
+            </LazyMotion>
+          </Suspense>
+        </div>
+      </div>
     </>
   );
 };
 
-export default Projects;
+// Memoize the component to prevent unnecessary re-renders
+export default memo(Projects);

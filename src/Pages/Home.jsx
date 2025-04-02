@@ -1,16 +1,46 @@
-import React from "react";
+import React, { lazy, Suspense, useEffect, useCallback } from "react";
 import Header from "../components/Header";
-import SwiperCarousel from "../components/HomeComponents/SwiperCarousel";
-import Aboutus from "../components/Aboutus";
-import Experience from "../components/HomeComponents/Experience";
-import Expertise from "../components/HomeComponents/Expertise";
-import Testimonials from "../components/HomeComponents/Testimonials";
-import FeaturedProjects from "../components/HomeComponents/FeaturedProjects";
-import ContactCTA from "../components/HomeComponents/ContactCTA";
 import SEO from "../components/SEO";
-import { motion } from "framer-motion";
+import { motion, LazyMotion, domAnimation } from "framer-motion";
+import LoadingSpinner from "../components/LoadingSpinner";
+import { usePerformance } from "../context/PerformanceContext";
+
+// Lazy load components
+const SwiperCarousel = lazy(() => import("../components/HomeComponents/SwiperCarousel"));
+const Aboutus = lazy(() => import("../components/Aboutus"));
+const Experience = lazy(() => import("../components/HomeComponents/Experience"));
+const Expertise = lazy(() => import("../components/HomeComponents/Expertise"));
+const Testimonials = lazy(() => import("../components/HomeComponents/Testimonials"));
+const FeaturedProjects = lazy(() => import("../components/HomeComponents/FeaturedProjects"));
+const ContactCTA = lazy(() => import("../components/HomeComponents/ContactCTA"));
+
+// Fallback loading component
+const SectionLoader = () => (
+  <div className="flex justify-center items-center py-20">
+    <LoadingSpinner />
+  </div>
+);
 
 const Home = () => {
+  const { trackRender } = usePerformance();
+  
+  // Memoize preload function
+  const preloadComponents = useCallback(async () => {
+    const SwiperModule = import("../components/HomeComponents/SwiperCarousel");
+    const AboutModule = import("../components/Aboutus");
+    
+    await Promise.all([SwiperModule, AboutModule]);
+  }, []);
+  
+  // Preload critical assets
+  useEffect(() => {
+    // Track component render - only call once
+    trackRender("Home");
+    
+    // Preload the most important component
+    preloadComponents();
+  }, []); // Empty dependency array to run once
+
   const keywords = `
     architects in Jalandhar, interior design Jalandhar, landscape design Punjab,
     urban design firms India, master planning services, sustainable architecture India,
@@ -34,6 +64,7 @@ const Home = () => {
   const description =
     "VSA Architects is a premier architectural firm in Jalandhar, Punjab specializing in innovative and sustainable design solutions for residential, commercial, and urban projects. Our multidisciplinary team delivers excellence in architectural design, interior design, landscape design, and master planning services across India.";
 
+  // Use lightweight animation renderer
   return (
     <>
       <SEO
@@ -44,64 +75,89 @@ const Home = () => {
         breadcrumb={true}
       />
       <Header />
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.8 }}
-        className="overflow-hidden"
-      >
-        <SwiperCarousel />
-      </motion.div>
-      <motion.div
-        initial={{ opacity: 0, y: 50 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.8, delay: 0.2 }}
-      >
-        <Aboutus />
-      </motion.div>
-      <motion.div
-        initial={{ opacity: 0, y: 50 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.8, delay: 0.3 }}
-      >
-        <Experience />
-      </motion.div>
-      <motion.div
-        initial={{ opacity: 0, y: 50 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.8, delay: 0.3 }}
-      >
-        <FeaturedProjects />
-      </motion.div>
-      <motion.div
-        initial={{ opacity: 0, y: 50 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.8, delay: 0.4 }}
-      >
-        <Expertise />
-      </motion.div>
-      <motion.div
-        initial={{ opacity: 0, y: 50 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.8, delay: 0.3 }}
-      >
-        <Testimonials />
-      </motion.div>
-      <motion.div
-        initial={{ opacity: 0, y: 50 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.8, delay: 0.3 }}
-      >
-        <ContactCTA />
-      </motion.div>
+      
+      {/* Use LazyMotion to only load animation features when needed */}
+      <LazyMotion features={domAnimation}>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8 }}
+          className="overflow-hidden"
+        >
+          <Suspense fallback={<SectionLoader />}>
+            <SwiperCarousel />
+          </Suspense>
+        </motion.div>
+
+        <Suspense fallback={<SectionLoader />}>
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.1 }}
+            transition={{ duration: 0.6 }}
+          >
+            <Aboutus />
+          </motion.div>
+        </Suspense>
+
+        <Suspense fallback={<SectionLoader />}>
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.1 }}
+            transition={{ duration: 0.6 }}
+          >
+            <Experience />
+          </motion.div>
+        </Suspense>
+
+        <Suspense fallback={<SectionLoader />}>
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.1 }}
+            transition={{ duration: 0.6 }}
+          >
+            <FeaturedProjects />
+          </motion.div>
+        </Suspense>
+
+        <Suspense fallback={<SectionLoader />}>
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.1 }}
+            transition={{ duration: 0.6 }}
+          >
+            <Expertise />
+          </motion.div>
+        </Suspense>
+
+        <Suspense fallback={<SectionLoader />}>
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.1 }}
+            transition={{ duration: 0.6 }}
+          >
+            <Testimonials />
+          </motion.div>
+        </Suspense>
+
+        <Suspense fallback={<SectionLoader />}>
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.1 }}
+            transition={{ duration: 0.6 }}
+          >
+            <ContactCTA />
+          </motion.div>
+        </Suspense>
+      </LazyMotion>
     </>
   );
 };
 
-export default Home;
+// Memoize the component to prevent unnecessary re-renders
+export default React.memo(Home);

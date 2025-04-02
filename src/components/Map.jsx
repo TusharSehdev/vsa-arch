@@ -1,151 +1,206 @@
-import React, { useEffect, useMemo, useCallback, useState } from "react";
+import React, { useEffect, useState, useRef, useMemo, memo } from "react";
 import {
   MapContainer,
   TileLayer,
   Marker,
   Popup,
   useMap,
-  useMapEvent,
-  Rectangle,
+  ZoomControl
 } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { motion } from "framer-motion";
+
+// Fix for Leaflet default icon issues with bundlers
+// Delete these lines if using a custom SVG icon
+import icon from 'leaflet/dist/images/marker-icon.png';
+import iconShadow from 'leaflet/dist/images/marker-shadow.png';
+
+// Create icons once outside of component render
+const DefaultIcon = L.icon({
+  iconUrl: icon,
+  shadowUrl: iconShadow,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41]
+});
+
+L.Marker.prototype.options.icon = DefaultIcon;
+
+// Custom CSS for map container
+const mapStyles = {
+  container: {
+    width: "100%",
+    height: "500px",
+    borderRadius: "0.75rem",
+  },
+  darkMapContainer: {
+    filter: "brightness(0.85)",
+  }
+};
 
 // Center position of the map
 const position = [31.31437783056458, 75.59289214695548];
 
-// Convert your SVG to Base64-encoded URL
-const svgString = `
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" id="location"><path fill="#e3e2e1" d="M54.01 58.74C54.01 61.65 44.15 64 32 64c-12.15 0-22.01-2.35-22.01-5.26 0-2.6 7.9-4.74 18.26-5.18h7.5c10.37.44 18.26 2.58 18.26 5.18z"></path><path fill="#e82327" d="M32 0C20.7 0 11.54 9.15 11.54 20.45 11.54 31.75 32 58.74 32 58.74s20.45-26.99 20.45-38.29S43.3 0 32 0zm0 33.99c-7.48 0-13.54-6.06-13.54-13.54S24.52 6.91 32 6.91c7.48 0 13.54 6.06 13.54 13.54S39.48 33.99 32 33.99z"></path></svg>`;
+// Create a simpler SVG marker for minimalist design - light version
+const lightSvgString = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#ffffff" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="12" cy="10" r="3"></circle>
+  <path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 7 8 11.7z"></path>
+</svg>`;
 
-// Convert SVG string to Base64
-const svgUrl = `data:image/svg+xml;base64,${btoa(svgString)}`;
+// Create a simpler SVG marker for minimalist design - dark version
+const darkSvgString = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#333333" stroke="#333333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="12" cy="10" r="3"></circle>
+  <path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 7 8 11.7z"></path>
+</svg>`;
 
-// Define custom icon using Leaflet's L.Icon class
-const customIcon = new L.Icon({
-  iconUrl: svgUrl,
-  iconSize: [67, 67], // size of the icon
-  iconAnchor: [32, 64], // point of the icon which will correspond to marker's location
-  popupAnchor: [0, -64], // point from which the popup should open relative to the iconAnchor
+// Create safer versions of the SVG URLs that work with all browsers
+const encodedLightSvg = encodeURIComponent(lightSvgString);
+const lightSvgUrl = `data:image/svg+xml;charset=utf-8,${encodedLightSvg}`;
+
+const encodedDarkSvg = encodeURIComponent(darkSvgString);
+const darkSvgUrl = `data:image/svg+xml;charset=utf-8,${encodedDarkSvg}`;
+
+// Pre-create both icons to avoid re-creating during render
+const lightCustomIcon = L.icon({
+  iconUrl: lightSvgUrl,
+  iconSize: [38, 38],
+  iconAnchor: [19, 38],
+  popupAnchor: [0, -38]
 });
 
-const MapComponent = () => {
+const darkCustomIcon = L.icon({
+  iconUrl: darkSvgUrl,
+  iconSize: [38, 38],
+  iconAnchor: [19, 38],
+  popupAnchor: [0, -38]
+});
+
+// Component to update map view - memoized to prevent unnecessary re-renders
+const MapComponent = memo(({ isDarkMode }) => {
   const map = useMap();
+  
+  useEffect(() => {
+    map.setView(position, 15);
+  }, [map]);
 
-  // Example of using useMap to interact with the map
-  map.setView(position, 14);
+  // Use the correct icon based on theme
+  const icon = isDarkMode ? lightCustomIcon : darkCustomIcon;
 
   return (
-    <>
-      <Marker position={position} icon={customIcon}>
-        <Popup>VSA Architecture</Popup>
-      </Marker>
-    </>
+    <Marker position={position} icon={icon}>
+      <Popup className="minimalist-popup">
+        <div className="font-medium py-1">VSA Architects</div>
+        <div className="text-sm text-gray-600 dark:text-gray-400">Jalandhar, Punjab</div>
+      </Popup>
+    </Marker>
   );
-};
+});
 
-const POSITION_CLASSES = {
-  bottomleft: "leaflet-bottom leaflet-left",
-  bottomright: "leaflet-bottom leaflet-right",
-  topleft: "leaflet-top leaflet-left",
-  topright: "leaflet-top leaflet-right",
-};
+// Main Map component - memoized to prevent unnecessary re-renders
+const Map = memo(() => {
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [mapLoaded, setMapLoaded] = useState(false);
+  const mapRef = useRef(null);
 
-const BOUNDS_STYLE = { weight: 1 };
+  // Tile URLs - defined outside of render
+  // URLs for light and dark map tiles
+  const lightTileUrl = "https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png";
+  const darkTileUrl = "https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png";
+  
+  // Check for dark mode preference only once on mount and when theme changes
+  useEffect(() => {
+    const checkDarkMode = () => {
+      const isDark = localStorage.getItem("darkMode") === "true";
+      setIsDarkMode(isDark);
+    };
 
-function MinimapBounds({ parentMap, zoom }) {
-  const minimap = useMap();
+    // Initial check
+    checkDarkMode();
+    setMapLoaded(true);
 
-  // Clicking a point on the minimap sets the parent's map center
-  const onClick = useCallback(
-    (e) => {
-      parentMap.setView(e.latlng, parentMap.getZoom());
-    },
-    [parentMap]
+    // Listen for changes to the theme with MutationObserver
+    const observer = new MutationObserver(checkDarkMode);
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
+  // Memoize the tile URL to prevent recalculation
+  // FIX: Swapped the URL selection to match dark mode with dark map
+  // and light mode with light map
+  const tileUrl = useMemo(() => 
+    isDarkMode ? darkTileUrl : lightTileUrl, 
+    [isDarkMode]
   );
-  useMapEvent("click", onClick);
 
-  // Keep track of bounds in state to trigger renders
-  const [bounds, setBounds] = useState(parentMap.getBounds());
-  const onChange = useCallback(() => {
-    setBounds(parentMap.getBounds());
-    // Update the minimap's view to match the parent map's center and zoom
-    minimap.setView(parentMap.getCenter(), zoom);
-  }, [minimap, parentMap, zoom]);
+  // Memoize the attribution to prevent recreation
+  const attribution = useMemo(() => 
+    '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+    []
+  );
 
-  // Listen to events on the parent map
-  const handlers = useMemo(() => ({ move: onChange, zoom: onChange }), [onChange]);
-  useMapEvent(handlers);
-
-  return <Rectangle bounds={bounds} pathOptions={BOUNDS_STYLE} />;
-}
-
-function MinimapControl({ position, zoom }) {
-  const parentMap = useMap();
-  const mapZoom = zoom || 0;
-
-  // Memoize the minimap so it's not affected by position changes
-  const minimap = useMemo(
-    () => (
-      <MapContainer
-        style={{ height: 80, width: 80 }}
-        center={parentMap.getCenter()}
-        zoom={mapZoom}
-        dragging={false}
-        doubleClickZoom={false}
-        scrollWheelZoom={false}
-        attributionControl={false}
-        zoomControl={false}
+  if (!mapLoaded) {
+    return (
+      <motion.div 
+        className="w-full max-w-6xl mx-auto px-4 pb-20"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
       >
-        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-        <MinimapBounds parentMap={parentMap} zoom={mapZoom} />
-      </MapContainer>
-    ),
-    [parentMap, mapZoom]
-  );
-
-  const positionClass =
-    (position && POSITION_CLASSES[position]) || POSITION_CLASSES.topright;
-  return (
-    <div className={positionClass}>
-      <div className="leaflet-control leaflet-bar">{minimap}</div>
-    </div>
-  );
-}
-
-const Map = () => {
- 
-
-  return (
-    <>
-      <div className="rounded-2xl m-4 text-white">
-        <div className="max_padd_container2 pb-10">
-            <h1 className="text-3xl md:text-5xl font-semibold">Where to find us?</h1>
-            <div className="border border-primary my-4"></div>
-          <div
-            className="shadow-lg hover:shadow-2xl"
-            style={{ borderRadius: "20px" }}
-            data-aos="fade-up" 
-            data-aos-duration="1500"
-          >
-            <MapContainer
-              scrollWheelZoom={false}
-              center={position}
-              zoom={14}
-              style={{ width: "100%", height: "400px", borderRadius: "20px" }}
-            >
-              <TileLayer
-                url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
-              />
-              <MapComponent />
-              <MinimapControl position="topright" />
-            </MapContainer>
-          </div>
+        <div className="flex flex-col mb-8">
+          <h2 className="text-2xl font-medium text-gray-900 dark:text-white mb-2">Visit Our Office</h2>
+          <p className="text-gray-600 dark:text-gray-300 text-lg mb-6">Urban Estate Phase II, Jalandhar, Punjab, India</p>
         </div>
+        
+        <div className="h-[500px] w-full bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse flex items-center justify-center">
+          <p>Loading map...</p>
+        </div>
+      </motion.div>
+    );
+  }
+
+  return (
+    <motion.div 
+      className="w-full max-w-6xl mx-auto px-4 pb-20"
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.8 }}
+    >
+      <div className="flex flex-col mb-8">
+        <h2 className="text-2xl font-medium text-gray-900 dark:text-white mb-2">Visit Our Office</h2>
+        <p className="text-gray-600 dark:text-gray-300 text-lg mb-6">Urban Estate Phase II, Jalandhar, Punjab, India</p>
       </div>
-      <img src="/pattern.png" alt="" className="gray hidden lg:block" />
-    </>
+      
+      <div className="overflow-hidden rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300">
+        <MapContainer
+          ref={mapRef}
+          center={position}
+          zoom={15}
+          style={mapStyles.container}
+          zoomControl={false}
+          attributionControl={true}
+          className="z-0"
+          preferCanvas={true}
+        >
+          <TileLayer 
+            url={tileUrl} 
+            attribution={attribution}
+          />
+          <ZoomControl position="bottomright" />
+          <MapComponent isDarkMode={isDarkMode} />
+        </MapContainer>
+      </div>
+    </motion.div>
   );
-};
+});
 
 export default Map;

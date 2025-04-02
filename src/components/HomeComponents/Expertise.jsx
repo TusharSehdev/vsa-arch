@@ -70,7 +70,7 @@ const Expertise = () => {
   };
 
   return (
-    <div className="bg-[#1a1a1a] md:max_padd_container2 lg:max_padd_container pt-16 lg:pt-20 pb-16 overflow-hidden">
+    <div className="bg-white dark:bg-[#1a1a1a] md:max_padd_container2 lg:max_padd_container pt-16 lg:pt-20 pb-16 overflow-hidden">
       <motion.div
         initial="hidden"
         whileInView="visible"
@@ -80,7 +80,7 @@ const Expertise = () => {
         <div className="px-6 md:px-10">
           {/* Header */}
           <motion.div variants={fadeIn} className="mb-14">
-            <h2 className="text-3xl md:text-5xl font-medium">Our Expertise</h2>
+            <h2 className="text-3xl md:text-5xl font-medium text-gray-900 dark:text-white">Our Expertise</h2>
             <div className="w-16 h-[1px] mt-3 bg-primary"></div>
           </motion.div>
 
@@ -95,18 +95,18 @@ const Expertise = () => {
                 {/* Text Column */}
                 <div className="lg:col-span-4 order-2 lg:order-1 flex flex-col">
                   <div className="border-l border-primary/40 pl-4">
-                    <h3 className="text-2xl lg:text-3xl font-light">
+                    <h3 className="text-2xl lg:text-3xl font-light text-gray-900 dark:text-white">
                       {item.title}
                     </h3>
                   </div>
 
-                  <p className="mt-6 text-white/80 leading-relaxed">
+                  <p className="mt-6 text-gray-700 dark:text-white/80 leading-relaxed">
                     {item.description}
                   </p>
 
                   <Link
                     to="/projects"
-                    className="mt-auto pt-6 inline-flex items-center text-primary hover:text-white transition-colors duration-300 group"
+                    className="mt-auto pt-6 inline-flex items-center text-primary hover:text-gray-900 dark:hover:text-white transition-colors duration-300 group"
                   >
                     <span className="mr-2">See Projects</span>
                     <span className="transform translate-x-0 group-hover:translate-x-1 transition-transform duration-300">

@@ -28,7 +28,7 @@ const Experience = () => {
   ];
 
   return (
-    <div className="bg-[#1a1a1a] md:max_padd_container2 lg:max_padd_container pt-5 lg:pt-5 pb-16 overflow-hidden">
+    <div className="bg-white dark:bg-[#1a1a1a] md:max_padd_container2 lg:max_padd_container pt-5 lg:pt-16 pb-16 overflow-hidden">
       <motion.div
         initial="hidden"
         whileInView="visible"
@@ -38,7 +38,7 @@ const Experience = () => {
         <div className="relative px-6 md:px-10">
           {/* Header */}
           <motion.div variants={fadeIn} className="mb-14">
-            <h2 className="text-3xl md:text-5xl font-medium">Our Experience</h2>
+            <h2 className="text-3xl md:text-5xl font-medium text-gray-900 dark:text-white">Our Experience</h2>
             <div className="w-16 h-[1px] mt-3 bg-primary"></div>
           </motion.div>
 
@@ -49,12 +49,12 @@ const Experience = () => {
                 key={index}
                 variants={fadeInUp}
                 custom={index}
-                className="border-b border-white/10 pb-4"
+                className="border-b border-gray-200 dark:border-white/10 pb-4"
               >
                 <motion.p className="text-5xl md:text-6xl text-primary mb-3 font-light">
                   {item.number}
                 </motion.p>
-                <p className="text-lg text-white/70">{item.text}</p>
+                <p className="text-lg text-gray-700 dark:text-white/70">{item.text}</p>
               </motion.div>
             ))}
           </div>
@@ -66,13 +66,13 @@ const Experience = () => {
           >
             {/* Text Column */}
             <div className="order-2 lg:order-1 space-y-6 lg:pt-4">
-              <motion.h3 variants={fadeInUp} className="text-2xl font-light">
+              <motion.h3 variants={fadeInUp} className="text-2xl font-light text-gray-900 dark:text-white">
                 Delivering Excellence in{" "}
                 <span className="text-primary">Architecture</span>
               </motion.h3>
               <motion.p
                 variants={fadeInUp}
-                className="text-white/80 leading-relaxed"
+                className="text-gray-700 dark:text-white/80 leading-relaxed"
               >
                 With over three decades of experience, we've built a reputation
                 for creating distinctive spaces that blend aesthetics,
@@ -97,10 +97,10 @@ const Experience = () => {
                     variants={fadeInUp}
                     className="border-l border-primary/30 pl-3"
                   >
-                    <span className="text-lg font-medium block">
+                    <span className="text-lg font-medium block text-gray-900 dark:text-white">
                       {item.metric}
                     </span>
-                    <span className="text-white/60 text-sm">{item.desc}</span>
+                    <span className="text-gray-600 dark:text-white/60 text-sm">{item.desc}</span>
                   </motion.div>
                 ))}
               </div>
