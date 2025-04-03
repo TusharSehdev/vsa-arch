@@ -22,7 +22,21 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
     <link rel="manifest" href="/site.webmanifest" />
     <meta name="msapplication-TileColor" content="#da532c" />
-    <meta name="theme-color" content="#ffffff" />
+    <meta name="theme-color" content="#1a1a1a" />
+
+    <!-- Prevent flash of light theme by applying dark mode early -->
+    <script>
+      (function() {
+        const storedDarkMode = localStorage.getItem("darkMode");
+        // If no preference is stored (first visit) or dark mode was selected, apply dark mode
+        if (storedDarkMode === null || storedDarkMode === "true") {
+          document.documentElement.classList.add("dark");
+          if (storedDarkMode === null) {
+            localStorage.setItem("darkMode", "true");
+          }
+        }
+      })();
+    </script>
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>
@@ -177,10 +191,32 @@
     <!-- wix font  -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Load fonts with font-display swap to avoid render blocking -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Wix+Madefor+Display:wght@400..800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
+      media="print"
+      onload="this.media='all'"
     />
+    <!-- Fallback in case JavaScript is disabled -->
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet"
+      />
+    </noscript>
+    
+    <!-- Preload LCP image -->
+    <link 
+      rel="preload" 
+      href="https://vsa-architect.s3.ap-south-1.amazonaws.com/Website+3D/residential/Bali+Travels/grayyyy.webp" 
+      as="image" 
+      type="image/webp" 
+      fetchpriority="high"
+    />
+    
+    <!-- Preconnect to S3 -->
+    <link rel="preconnect" href="https://vsa-architect.s3.ap-south-1.amazonaws.com" crossorigin />
   </head>
   <body oncontextmenu="return false">
     <div id="root"></div>

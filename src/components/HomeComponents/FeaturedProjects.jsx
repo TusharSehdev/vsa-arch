@@ -1,31 +1,32 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import S3Image from "../S3Image";
 
 const projectsData = [
   {
+    id: 29,
     title: "Victoria Garden",
     category: "Urban Design",
     year: "2023",
     image:
       "https://vsa-architect.s3.ap-south-1.amazonaws.com/Website+3D/Urban+Design-Masterplanning/Victoria+Garden/master+plan/final+view+2+COLONY.webp",
-    slug: "victoria-garden",
   },
   {
+    id: 1,
     title: "The Gym Khanna Club",
     category: "Commercial Design",
     year: "2022",
     image:
       "https://vsa-architect.s3.ap-south-1.amazonaws.com/Website+3D/Commercial/BAR/BAR01+ps01.webp",
-    slug: "gym-khanna-club",
   },
   {
-    title: "Modern Residence",
+    id: 21,
+    title: "Manpreet's Residence",
     category: "Residential Design",
     year: "2023",
     image:
       "https://vsa-architect.s3.ap-south-1.amazonaws.com/Website+3D/residential/UE-II/2.webp",
-    slug: "modern-residence",
   },
 ];
 
@@ -83,13 +84,17 @@ const FeaturedProjects = () => {
                 transition={{ duration: 0.4 }}
                 className="group"
               >
-                <Link to={`/projects/${project.slug}`}>
+                <Link to={`/projects/${project.id}`}>
                   <div className="overflow-hidden rounded-md">
                     <div className="overflow-hidden">
-                      <img
+                      <S3Image
                         src={project.image}
                         alt={project.title}
-                        className="w-full h-auto object-contain transition-transform duration-300"
+                        className="w-full h-auto"
+                        objectFit="contain"
+                        placeholderColor="#121212"
+                        imageType="thumbnail"
+                        priority={index === 0}
                       />
                     </div>
                     <div className="pt-4">

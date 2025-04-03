@@ -4,6 +4,7 @@ import SEO from "../components/SEO";
 import { motion, LazyMotion, domAnimation } from "framer-motion";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { usePerformance } from "../context/PerformanceContext";
+import { preloadImages, convertToWebP } from "../utils/imageOptimizer";
 
 // Lazy load components
 const SwiperCarousel = lazy(() => import("../components/HomeComponents/SwiperCarousel"));
@@ -11,7 +12,7 @@ const Aboutus = lazy(() => import("../components/Aboutus"));
 const Experience = lazy(() => import("../components/HomeComponents/Experience"));
 const Expertise = lazy(() => import("../components/HomeComponents/Expertise"));
 const Testimonials = lazy(() => import("../components/HomeComponents/Testimonials"));
-const FeaturedProjects = lazy(() => import("../components/HomeComponents/FeaturedProjects"));
+const FeaturedProjects = lazy(() => import(/* webpackPrefetch: true */ "../components/HomeComponents/FeaturedProjects"));
 const ContactCTA = lazy(() => import("../components/HomeComponents/ContactCTA"));
 
 // Fallback loading component
@@ -28,8 +29,25 @@ const Home = () => {
   const preloadComponents = useCallback(async () => {
     const SwiperModule = import("../components/HomeComponents/SwiperCarousel");
     const AboutModule = import("../components/Aboutus");
+    const FeaturedProjectsModule = import("../components/HomeComponents/FeaturedProjects");
     
-    await Promise.all([SwiperModule, AboutModule]);
+    await Promise.all([SwiperModule, AboutModule, FeaturedProjectsModule]);
+  }, []);
+
+  // Preload critical images function
+  const preloadCriticalImages = useCallback(() => {
+    // Convert these URLs to WebP for better performance
+    const criticalImageUrls = [
+      convertToWebP("https://vsa-architect.s3.ap-south-1.amazonaws.com/Website+3D/Urban+Design-Masterplanning/Victoria+Garden/master+plan/final+view+2+COLONY.webp"),
+      convertToWebP("https://vsa-architect.s3.ap-south-1.amazonaws.com/Website+3D/Commercial/BAR/BAR01+ps01.webp"),
+      convertToWebP("https://vsa-architect.s3.ap-south-1.amazonaws.com/Website+3D/residential/UE-II/2.webp"),
+      // Local assets that are critical
+      "/logo2.png",
+      "/logoText.png"
+    ];
+    
+    // Preload these critical images
+    preloadImages(criticalImageUrls);
   }, []);
   
   // Preload critical assets
@@ -37,9 +55,10 @@ const Home = () => {
     // Track component render - only call once
     trackRender("Home");
     
-    // Preload the most important component
+    // Preload the most important components and images
     preloadComponents();
-  }, []); // Empty dependency array to run once
+    preloadCriticalImages();
+  }, [preloadComponents, preloadCriticalImages]); // Added preloadCriticalImages to dependency array
 
   const keywords = `
     architects in Jalandhar, interior design Jalandhar, landscape design Punjab,

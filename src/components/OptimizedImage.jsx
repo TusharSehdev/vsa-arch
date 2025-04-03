@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { lazyLoadImage } from '../utils/performance';
+import { convertToWebP, generateSrcSet, createPlaceholder, getImageSizes } from '../utils/imageOptimizer';
 
 /**
  * OptimizedImage component that lazy loads images and provides
- * blur-up loading technique for better perceived performance
+ * blur-up loading technique, responsive images, and automatic format selection
  */
 const OptimizedImage = ({
   src,
@@ -13,6 +14,14 @@ const OptimizedImage = ({
   height,
   placeholderColor = '#f3f4f6',
   lowQualitySrc,
+  sizes,
+  priority = false,
+  quality = 80,
+  objectFit = 'cover',
+  objectPosition = 'center',
+  imageType,
+  onLoad,
+  onError,
   ...props
 }) => {
   const [imageSrc, setImageSrc] = useState('');
@@ -21,15 +30,52 @@ const OptimizedImage = ({
   const imgRef = useRef(null);
   const observerRef = useRef(null);
 
-  // Load the low quality image first if provided
+  // Determine the appropriate sizes attribute based on the image type or use the provided sizes
+  const imageSizes = sizes || (imageType ? getImageSizes(imageType) : '100vw');
+  
+  // Handle image load events, including passing to external handlers
+  const handleImageLoad = () => {
+    setImageLoaded(true);
+    if (onLoad && typeof onLoad === 'function') {
+      onLoad();
+    }
+  };
+  
+  // Handle image error events, including passing to external handlers
+  const handleImageError = () => {
+    console.error(`Failed to load image: ${src}`);
+    if (onError && typeof onError === 'function') {
+      onError();
+    }
+  };
+  
+  // Load the low quality image first if provided or can be generated
   useEffect(() => {
-    if (lowQualitySrc) {
+    const placeholderSrc = createPlaceholder(src, lowQualitySrc);
+    
+    if (placeholderSrc) {
       const img = new Image();
       img.onload = () => {
-        setImageSrc(lowQualitySrc);
+        setImageSrc(placeholderSrc);
         setLowQualityLoaded(true);
       };
-      img.src = lowQualitySrc;
+      img.onerror = handleImageError;
+      img.src = placeholderSrc;
+    }
+    
+    // If this is a priority image, load it immediately
+    if (priority) {
+      const highQualitySrc = convertToWebP(src);
+      const img = new Image();
+      img.onload = () => {
+        setImageSrc(highQualitySrc);
+        setImageLoaded(true);
+        if (onLoad && typeof onLoad === 'function') {
+          onLoad();
+        }
+      };
+      img.onerror = handleImageError;
+      img.src = highQualitySrc;
     }
     
     return () => {
@@ -37,24 +83,32 @@ const OptimizedImage = ({
         observerRef.current();
       }
     };
-  }, [lowQualitySrc]);
+  }, [lowQualitySrc, src, priority, onLoad, onError]);
 
   // Set up lazy loading with IntersectionObserver
   useEffect(() => {
+    // Skip if this is a priority image (already loaded)
+    if (priority) return;
+    
     const elementToObserve = imgRef.current;
     
     if (!elementToObserve) return;
     
     // Function to handle when the image should be loaded
     const loadHighQualityImage = () => {
+      const optimizedSrc = convertToWebP(src);
+      
       observerRef.current = lazyLoadImage(
-        src,
+        optimizedSrc,
         () => {
-          setImageSrc(src);
+          setImageSrc(optimizedSrc);
           setImageLoaded(true);
+          if (onLoad && typeof onLoad === 'function') {
+            onLoad();
+          }
         },
         () => {
-          console.error(`Failed to load image: ${src}`);
+          handleImageError();
           // Keep the low quality image if high quality fails
           if (!lowQualityLoaded && !imageLoaded) {
             setImageSrc(placeholderColor);
@@ -88,7 +142,7 @@ const OptimizedImage = ({
       // Fallback for browsers without IntersectionObserver
       loadHighQualityImage();
     }
-  }, [src, lowQualityLoaded, imageLoaded, placeholderColor]);
+  }, [src, lowQualityLoaded, imageLoaded, placeholderColor, priority, onLoad, onError]);
 
   // Styles for the image container
   const containerStyle = {
@@ -106,7 +160,9 @@ const OptimizedImage = ({
     filter: imageLoaded ? 'blur(0)' : 'blur(10px)',
     width: '100%',
     height: '100%',
-    objectFit: 'cover',
+    objectFit,
+    objectPosition,
+    ...(props.style || {}),
   };
 
   return (
@@ -114,12 +170,16 @@ const OptimizedImage = ({
       <img
         ref={imgRef}
         src={imageSrc || 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=='}
+        srcSet={imageLoaded ? generateSrcSet(src) : undefined}
+        sizes={imageSizes}
         alt={alt}
         style={imageStyle}
         width={width}
         height={height}
-        loading="lazy"
+        loading={priority ? 'eager' : 'lazy'}
         decoding="async"
+        onLoad={handleImageLoad}
+        onError={handleImageError}
         {...props}
       />
     </div>

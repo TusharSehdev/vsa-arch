@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import OptimizedImage from "./OptimizedImage";
 
 // Animation variants
 const navVariants = {
@@ -73,17 +74,25 @@ const ThemeToggle = ({ darkMode, toggleDarkMode }) => {
       aria-label="Toggle dark mode"
     >
       {darkMode ? (
-        <img
+        <OptimizedImage
           src="/sun.svg"
           alt="Switch to light mode"
           className="w-5 h-5"
+          width={20}
+          height={20}
+          priority={true}
+          placeholderColor="transparent"
           style={{ filter: "invert(100%)" }}
         />
       ) : (
-        <img
+        <OptimizedImage
           src="/moon.svg"
           alt="Switch to dark mode"
           className="w-4 h-4"
+          width={16}
+          height={16}
+          priority={true}
+          placeholderColor="transparent"
           style={{ filter: "invert(0%)" }}
         />
       )}
@@ -169,20 +178,28 @@ const MobileMenu = ({
                 to="https://www.facebook.com/share/ryhxrkCQxGt4yFsH/?mibextid=qi2Omg"
                 target="_blank"
               >
-                <img
+                <OptimizedImage
                   src="/facebook2.svg"
                   alt="Facebook"
                   className="w-8 h-8 hover:opacity-70 transition-opacity filter invert dark:invert-0"
+                  width={32}
+                  height={32}
+                  priority={true}
+                  placeholderColor="transparent"
                 />
               </Link>
               <Link
                 to="https://www.instagram.com/vsa_architects?igsh=MXIzNWV6dGFhYjhkZg=="
                 target="_blank"
               >
-                <img
+                <OptimizedImage
                   src="/instagram2.svg"
                   alt="Instagram"
                   className="w-8 h-8 hover:opacity-70 transition-opacity filter invert dark:invert-0"
+                  width={32}
+                  height={32}
+                  priority={true}
+                  placeholderColor="transparent"
                 />
               </Link>
               <ThemeToggle
@@ -201,7 +218,7 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [pathname, setPathname] = useState("/");
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(true);
 
   // Toggle dark mode
   const toggleDarkMode = () => {
@@ -219,11 +236,17 @@ export default function Navbar() {
   useEffect(() => {
     setPathname(window.location.pathname);
 
-    // Check if dark mode is enabled in localStorage
-    const isDarkMode = localStorage.getItem("darkMode") === "true";
+    // Check localStorage for saved preference, default to dark if none exists
+    const storedDarkMode = localStorage.getItem("darkMode");
+    const isDarkMode = storedDarkMode === null ? true : storedDarkMode === "true";
+    
     setDarkMode(isDarkMode);
+    
+    // Apply dark mode to document if needed
     if (isDarkMode) {
       document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
     }
 
     const handleScroll = () => {
@@ -268,15 +291,23 @@ export default function Navbar() {
             className="flex items-center z-50"
           >
             <Link to="/" className="flex items-center gap-2">
-              <img
+              <OptimizedImage
                 src="/logo2.png"
                 alt="VSA Architects"
                 className="w-[70px] md:w-[80px] dark:invert-0"
+                width={60}
+                
+                priority={true}
+                placeholderColor="transparent"
               />
-              <img
+              <OptimizedImage
                 src="/logoText.png"
                 alt="VSA Architects"
                 className="w-[60px] md:w-[80px] dark:invert-0"
+                width={60}
+              
+                priority={true}
+                placeholderColor="transparent"
               />
             </Link>
           </motion.div>
@@ -321,20 +352,28 @@ export default function Navbar() {
                 to="https://www.facebook.com/share/ryhxrkCQxGt4yFsH/?mibextid=qi2Omg"
                 target="_blank"
               >
-                <img
+                <OptimizedImage
                   src="/facebook2.svg"
                   alt="Facebook"
                   className="w-5 h-5 hover:opacity-70 transition-opacity filter invert dark:invert-0"
+                  width={20}
+                  height={20}
+                  priority={true}
+                  placeholderColor="transparent"
                 />
               </Link>
               <Link
                 to="https://www.instagram.com/vsa_architects?igsh=MXIzNWV6dGFhYjhkZg=="
                 target="_blank"
               >
-                <img
+                <OptimizedImage
                   src="/instagram2.svg"
                   alt="Instagram"
                   className="w-5 h-5 hover:opacity-70 transition-opacity filter invert dark:invert-0"
+                  width={20}
+                  height={20}
+                  priority={true}
+                  placeholderColor="transparent"
                 />
               </Link>
               <ThemeToggle

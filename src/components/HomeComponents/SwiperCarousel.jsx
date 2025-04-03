@@ -1,12 +1,23 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, EffectFade, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/effect-fade";
 import { motion, AnimatePresence } from "framer-motion";
+import S3Image from "../S3Image";
+import { preloadImages, convertToWebP } from "../../utils/imageOptimizer";
 
 const slidesData = [
+  // Putting Fluidic Bedroom Interior first for LCP optimization
+  {
+    imageSrc:
+      "https://vsa-architect.s3.ap-south-1.amazonaws.com/Website+3D/residential/Bali+Travels/grayyyy.webp",
+    title: "Fluidic Bedroom Interior",
+    subtitle: "Interior Design",
+    description:
+      "A serene bedroom sanctuary that combines flowing design elements with comfortable, luxurious materials.",
+  },
   {
     imageSrc:
       "https://vsa-architect.s3.ap-south-1.amazonaws.com/Website+3D/Urban+Design-Masterplanning/Victoria+Garden/master+plan/final+view+2+COLONY.webp",
@@ -15,14 +26,6 @@ const slidesData = [
     description:
       "A comprehensive master-planned community featuring modern residential spaces integrated with natural surroundings.",
   },
-  // {
-  //   imageSrc:
-  //     "https://vsa-architect.s3.ap-south-1.amazonaws.com/Website+3D/Urban+Design-Masterplanning/Victoria+Garden/render01+ps.webp",
-  //   title: "Ameek's Paradise",
-  //   subtitle: "Urban Design",
-  //   description:
-  //     "An innovative urban development that combines contemporary architecture with sustainable design principles.",
-  // },
   {
     imageSrc:
       "https://vsa-architect.s3.ap-south-1.amazonaws.com/Website+3D/Commercial/BAR/BAR01+ps01.webp",
@@ -47,20 +50,39 @@ const slidesData = [
     description:
       "A contemporary home that maximizes space and light while offering elegant living spaces for modern lifestyles.",
   },
-  {
-    imageSrc:
-      "https://vsa-architect.s3.ap-south-1.amazonaws.com/Website+3D/residential/Bali+Travels/grayyyy.webp",
-    title: "Fluidic Bedroom Interior",
-    subtitle: "Interior Design",
-    description:
-      "A serene bedroom sanctuary that combines flowing design elements with comfortable, luxurious materials.",
-  },
 ];
 
 function SwiperCarousel() {
   const swiperRef = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isHovering, setIsHovering] = useState(false);
+  const [imagePreloaded, setImagePreloaded] = useState(false);
+
+  // Preload LCP image
+  useEffect(() => {
+    // Convert to webp for better performance
+    const lcpImageUrl = convertToWebP(slidesData[0].imageSrc);
+    
+    // Create image object to preload LCP image
+    const img = new Image();
+    img.src = lcpImageUrl;
+    img.onload = () => setImagePreloaded(true);
+    
+    // Also use link preload for faster loading
+    const link = document.createElement('link');
+    link.rel = 'preload';
+    link.as = 'image';
+    link.href = lcpImageUrl;
+    link.type = 'image/webp';
+    document.head.appendChild(link);
+    
+    // Clean up
+    return () => {
+      if (link && link.parentNode) {
+        link.parentNode.removeChild(link);
+      }
+    };
+  }, []);
 
   // Navigate to specific slide
   const goToSlide = (index) => {
@@ -116,14 +138,24 @@ function SwiperCarousel() {
         modules={[Autoplay, EffectFade, Pagination]}
         onSlideChange={handleSlideChange}
         className="w-full h-full"
+        initialSlide={0}
       >
         {slidesData.map((slide, index) => (
           <SwiperSlide key={index} className="relative h-full">
             <div className="absolute inset-0 bg-black/20"></div>
-            <img
+            <S3Image
               src={slide.imageSrc}
               alt={`${slide.title}`}
-              className="w-full h-full object-cover object-center transition-transform duration-10000 transform scale-100 group-hover:scale-105"
+              className="w-full h-full"
+              objectFit="cover"
+              objectPosition="center"
+              priority={index === 0}
+              fetchpriority={index === 0 ? "high" : "auto"}
+              imageType="hero"
+              placeholderColor="#121212"
+              loading={index === 0 ? "eager" : "lazy"}
+              width={1920}
+              height={1080}
             />
 
             <motion.div

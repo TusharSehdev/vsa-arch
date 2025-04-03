@@ -9,9 +9,17 @@ import "./index.css";
 const preloadCriticalAssets = () => {
   // Preload critical images, fonts, etc.
   const preloadLinks = [
-    // Add critical resources here, for example:
-    // { rel: 'preload', href: '/logo.png', as: 'image' },
-    // { rel: 'preload', href: '/fonts/main-font.woff2', as: 'font', type: 'font/woff2', crossOrigin: 'anonymous' }
+    // LCP image
+    { 
+      rel: 'preload', 
+      href: 'https://vsa-architect.s3.ap-south-1.amazonaws.com/Website+3D/residential/Bali+Travels/grayyyy.webp', 
+      as: 'image',
+      type: 'image/webp',
+      importance: 'high'
+    },
+    // Font preconnect instead of preload
+    { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
+    { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossOrigin: 'anonymous' }
   ];
   
   preloadLinks.forEach(attrs => {
@@ -21,16 +29,32 @@ const preloadCriticalAssets = () => {
     });
     document.head.appendChild(link);
   });
+  
+  // Load the font asynchronously
+  if ('requestIdleCallback' in window) {
+    window.requestIdleCallback(() => {
+      const fontLink = document.createElement('link');
+      fontLink.href = 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap';
+      fontLink.rel = 'stylesheet';
+      fontLink.media = 'print';
+      fontLink.onload = () => { fontLink.media = 'all'; };
+      document.head.appendChild(fontLink);
+    }, { timeout: 1000 });
+  } else {
+    setTimeout(() => {
+      const fontLink = document.createElement('link');
+      fontLink.href = 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap';
+      fontLink.rel = 'stylesheet';
+      document.head.appendChild(fontLink);
+    }, 20);
+  }
 };
 
 // Prefetch non-critical but likely-to-be-needed resources
 const prefetchAssets = () => {
   if ('requestIdleCallback' in window) {
     window.requestIdleCallback(() => {
-      const prefetchLinks = [
-        // Add assets to prefetch here, for example:
-        // { rel: 'prefetch', href: '/images/hero-background.jpg' }
-      ];
+      const prefetchLinks = [];
       
       prefetchLinks.forEach(attrs => {
         const link = document.createElement('link');
@@ -47,9 +71,6 @@ const prefetchAssets = () => {
 const initNonCriticalFeatures = () => {
   if ('requestIdleCallback' in window) {
     window.requestIdleCallback(() => {
-      // Initialize analytics or other non-essential services
-      // For example: initializeAnalytics();
-      
       // Register service worker for PWA
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
