@@ -62,20 +62,20 @@ function SwiperCarousel() {
   useEffect(() => {
     // Convert to webp for better performance
     const lcpImageUrl = convertToWebP(slidesData[0].imageSrc);
-    
+
     // Create image object to preload LCP image
     const img = new Image();
     img.src = lcpImageUrl;
     img.onload = () => setImagePreloaded(true);
-    
+
     // Also use link preload for faster loading
-    const link = document.createElement('link');
-    link.rel = 'preload';
-    link.as = 'image';
+    const link = document.createElement("link");
+    link.rel = "preload";
+    link.as = "image";
     link.href = lcpImageUrl;
-    link.type = 'image/webp';
+    link.type = "image/webp";
     document.head.appendChild(link);
-    
+
     // Clean up
     return () => {
       if (link && link.parentNode) {
@@ -141,22 +141,25 @@ function SwiperCarousel() {
         initialSlide={0}
       >
         {slidesData.map((slide, index) => (
-          <SwiperSlide key={index} className="relative h-full">
+          <SwiperSlide key={index} className="relative h-full bg-black">
             <div className="absolute inset-0 bg-black/20"></div>
-            <S3Image
-              src={slide.imageSrc}
-              alt={`${slide.title}`}
-              className="w-full h-full"
-              objectFit="cover"
-              objectPosition="center"
-              priority={index === 0}
-              fetchpriority={index === 0 ? "high" : "auto"}
-              imageType="hero"
-              placeholderColor="#121212"
-              loading={index === 0 ? "eager" : "lazy"}
-              width={1920}
-              height={1080}
-            />
+            <div className="h-full w-full flex items-center justify-center">
+              <S3Image
+                src={slide.imageSrc}
+                alt={`${slide.title}`}
+                className="max-h-full max-w-full"
+                objectFit="contain"
+                objectPosition="center"
+                priority={index === 0}
+                fetchpriority={index === 0 ? "high" : "auto"}
+                imageType="hero"
+                placeholderColor="#121212"
+                loading={index === 0 ? "eager" : "lazy"}
+                width={1920}
+                height={1080}
+                style={{ maxHeight: "100vh" }}
+              />
+            </div>
 
             <motion.div
               className="absolute inset-0 flex flex-col justify-end pointer-events-none"
